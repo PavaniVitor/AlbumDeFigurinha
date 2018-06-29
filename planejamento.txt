@@ -1,0 +1,58 @@
+	i.  Inspiração: álbum de figurinhas da COPA 2018. Deve-se poder verificar
+	estado atual do álbum. (6)
+	
+	-> colocar porcentagem do estado do album 
+
+	ii. Composto por páginas, cada uma com uma quantidade específica de
+	figurinhas . (3)
+
+	-> matriz de 3 dimensoes (linha, coluna, pagina)
+
+	iii. Figurinhas identificadas pelo seu número.(2)
+	
+	->  buscar o nome da figurinha pelo numero 
+
+	iv. Cada página tem uma disposição das suas figurinhas.(4)
+
+	-> a cada pagina por time, trocar as cores (windows.h)
+
+	v. Simular “compra” de pacotinhos de figurinhas.(5)
+	
+	->  Chance de vir uma figurinha nova;
+
+	vi. Administrar duplicatas e trocas de figurinhas com outros usuários. (1)
+
+	-> checar as figurinhas repetidas do arquivo de outros usuarios; 
+
+
+
+
+
+
+
+
+------------------------------------------------------
+modelo do arquivo pessoal
+
+-------------------------inicio---------------------
+senha
+n figurinha
+n figurinha
+
+figurinhas repetidas
+figurinhas repetidas
+----------------------fim--------------------------
+modelo do arquivo nome das figurinhas 
+---------------------inicio ------------------
+nº nome
+nº nome 
+----------------------fim------------------------
+
+
+
+
+
+
+
+
+	
