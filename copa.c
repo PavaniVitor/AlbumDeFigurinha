@@ -26,6 +26,7 @@ int cadastro()
         {
             printf("esse usuario ja existe\n");
             return 1;
+            fclose(fp);
         }
         else
         {
