@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define EXTENSION ".txt"
+#define EXTENSION ".cup"
+#define MAXFIGS 700 // trocar pelo numero correto de figurinhas que o album vai possuir
 
 //-----------------A FAZER-----------------//
 
@@ -11,10 +12,40 @@
 //-> definir um algoritmo para escrever nos arquivos binarios, de forma que esses dados
 //   possam ser lidos e alterados dinamicamente durante a execuçao do programa
 
+typedef struct stickers
+{
+    unsigned int numero;
+    unsigned int quantidade;
+    char nome[20];
+}figura;
+
+int ArqVazio(FILE* fp)
+{
+    int gravando = 0;
+    figura vazia;
+    vazia.nome [0] = '\0';
+    int i;
+    for (i = 1; i <= MAXFIGS; i++)
+    {
+        vazia.numero = i;
+        gravando += fwrite(&vazia , sizeof(figura), 1 , fp);
+    }
+    if(gravando == MAXFIGS)
+    {
+        printf("usuario criado com sucesso\n");
+        return 1;
+    }
+    else
+    {
+        printf("falha ao criar usuario %d", gravando);
+        return 0;
+    }
+}
 
 FILE* cadastro()
 {
-    FILE *fp;
+    FILE *fp = NULL;
+    int grav;
     char ext[] = EXTENSION;
     char usuario[24] = {};
     char senha[10]= {};
@@ -23,7 +54,8 @@ FILE* cadastro()
     
     if(strlen(usuario)<=20)
     {
-        strcat(usuario , EXTENSION);
+        strcat(usuario , ext);
+        fp = fopen(usuario, "rb");
 
         if (fp)
         {
@@ -33,10 +65,11 @@ FILE* cadastro()
         }
         else
         {
-            fp = fopen(usuario, "w+");
-            printf("novo usuario criado\n");
+            fp = fopen(usuario, "wb");
             printf("Digite a senha ate 10 caracteres\n");
             scanf("%s", &senha[0]);
+            grav = fwrite (&senha,sizeof(senha),1,fp); //grava a senha no arquivo 
+            ArqVazio(fp);
             return fp;
         }
         
@@ -80,11 +113,16 @@ FILE* login()
         }
     }
 }
+void LerAlbum(FILE* fp)
+{
+
+}
 void main()
 {
-    login();
-    while(cadastro())
+    FILE* user = NULL;
+    //login();
+    while(user == NULL)
     {
-        cadastro();
+        user = cadastro();
     }
 }
