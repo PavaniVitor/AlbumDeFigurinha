@@ -3,7 +3,9 @@
 #include <string.h>
 
 #define EXTENSION ".cup"
-#define MAXFIGS 700 // trocar pelo numero correto de figurinhas que o album vai possuir
+#define MAXFIGS 700     // trocar pelo numero correto de figurinhas que o album vai possuir
+#define PAGES 50        // trocar pelo numero correto de paginas do album
+#define FIGSPAGE 10     // trocar pelo numero correto de figurinhas por pagina
 
 //-----------------A FAZER-----------------//
 
@@ -11,6 +13,9 @@
 
 //-> definir um algoritmo para escrever nos arquivos binarios, de forma que esses dados
 //   possam ser lidos e alterados dinamicamente durante a execuçao do programa
+
+//-------------LEMBRAR:-------------------//
+// usar wb+ para criar arquivos, mas as funçoes devem retornar ponteiros RB+ para ediçao!!!!
 
 typedef struct stickers
 {
@@ -24,6 +29,7 @@ int ArqVazio(FILE* fp)
     int gravando = 0;
     figura vazia;
     vazia.nome [0] = '\0';
+    vazia.quantidade = 0;
     int i;
     for (i = 1; i <= MAXFIGS; i++)
     {
@@ -65,7 +71,9 @@ FILE* cadastro()
         }
         else
         {
-            fp = fopen(usuario, "wb");
+            fp = fopen(usuario, "wb+");
+            fclose(fp);
+            fp = fopen(usuario,  "rb+");
             printf("Digite a senha ate 10 caracteres\n");
             scanf("%s", &senha[0]);
             grav = fwrite (&senha,sizeof(senha),1,fp); //grava a senha no arquivo 
@@ -98,7 +106,7 @@ FILE* login()
     else
     {
         strcat(usuario, EXTENSION);
-        fp = fopen(usuario,"r");
+        fp = fopen(usuario,"rb");
         if (fp)
         {
             printf("Digite a senha:\n");
@@ -113,16 +121,42 @@ FILE* login()
         }
     }
 }
-void LerAlbum(FILE* fp)
+void PrintPage(FILE* fp, unsigned int page)
 {
-
+    printf ("Pagina: %d\n" ,page);
+    figura leitura;
+    page  = page - 1;
+    fseek(fp , 10*sizeof(char),SEEK_SET); //pula a senha com o cursor
+    if (page == 0)
+    {
+        int i;
+        for(i = 0 ; i < FIGSPAGE ; i++)
+        {
+            fread(&leitura , sizeof (figura), 1 , fp);
+            printf (" %d %s %d\n", leitura.numero, leitura.nome , leitura.quantidade);
+        }
+    }
+    else
+    {
+        int i;
+        fseek(fp, FIGSPAGE*sizeof(figura)*page,SEEK_CUR);
+        for (i = 0 ; i<FIGSPAGE ; i++)
+        {
+            fread(&leitura , sizeof (figura), 1 , fp);
+            printf (" %d %s %d\n", leitura.numero, leitura.nome , leitura.quantidade);
+        }
+    }
 }
 void main()
 {
+    int page;
     FILE* user = NULL;
     //login();
     while(user == NULL)
     {
         user = cadastro();
     }
+    printf("Digite a pagina que deseja visualizar\n");
+    scanf(" %d", &page);
+    PrintPage(user , page);
 }
