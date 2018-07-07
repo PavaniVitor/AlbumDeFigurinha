@@ -94,13 +94,14 @@ FILE* login()
 
     char usuario[24];
     char senha[10];
+    char senhaLida[10];
     FILE* fp = NULL; 
     printf("\nLogin:\n");
     printf ("Digite o nome de usuario:\n");
     scanf ("%s", &usuario[0]);
     if (strlen(usuario)>20)
     {
-        printf("o nome de usuario só vai até 20 caracteres\n");
+        printf("o nome de usuario vai até 20 caracteres\n");
         return NULL;
     }
     else
@@ -109,10 +110,22 @@ FILE* login()
         fp = fopen(usuario,"rb");
         if (fp)
         {
+
+            fp = fopen(usuario,"rb+");
             printf("Digite a senha:\n");
             scanf(" %s",&senha[0]);
-            // se tudo der certo retorna fp
-            // preciso defnir um padrao de leitura e escrita no arquivo, para poder ler e escrever senhas
+            rewind(fp);
+            fread(&senhaLida[0],10*sizeof(char),1,fp);
+            if(strcmp(senha, senhaLida) == 0)
+            {
+                printf("Senha digitada com sucesso\n");
+                return fp;
+            }
+            else
+            {
+                printf("Senha incorreta\n");
+                return NULL;
+            }
         }
         else
         {
@@ -159,4 +172,5 @@ void main()
     printf("Digite a pagina que deseja visualizar\n");
     scanf(" %d", &page);
     PrintPage(user , page);
+
 }
