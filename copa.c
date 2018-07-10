@@ -24,6 +24,12 @@ typedef struct stickers
     char nome[20];
 }figura;
 
+typedef struct users
+{
+    char usuario[20];
+    char password[10];
+}user;
+
 int ArqVazio(FILE* fp)
 {
     int gravando = 0;
@@ -53,15 +59,14 @@ FILE* cadastro()
     FILE *fp = NULL;
     int grav;
     char ext[] = EXTENSION;
-    char usuario[24] = {};
-    char senha[10]= {};
+    user novo;
     printf("Digite o nome do usuario ate 20 caracteres\n");
-    scanf("%s", &usuario[0]);
+    scanf("%s", &novo.usuario[0]);
     
-    if(strlen(usuario)<=20)
+    if(strlen(novo.usuario)<=20)
     {
-        strcat(usuario , ext);
-        fp = fopen(usuario, "rb");
+        strcat(novo.usuario , ext);
+        fp = fopen(novo.usuario, "rb");
 
         if (fp)
         {
@@ -71,12 +76,13 @@ FILE* cadastro()
         }
         else
         {
-            fp = fopen(usuario, "wb+");
+            fp = fopen(novo.usuario, "wb+");
             fclose(fp);
-            fp = fopen(usuario,  "rb+");
+            fp = fopen(novo.usuario,  "rb+");
             printf("Digite a senha ate 10 caracteres\n");
-            scanf("%s", &senha[0]);
-            grav = fwrite (&senha,sizeof(senha),1,fp); //grava a senha no arquivo 
+            scanf(" %s", &novo.password[0]);
+            rewind(fp);
+            grav = fwrite (&novo,sizeof(user),1,fp); //grava a senha no arquivo 
             ArqVazio(fp);
             return fp;
         }
@@ -138,7 +144,7 @@ void PrintPage(FILE* fp, unsigned int page)
     printf ("Pagina: %d\n" ,page);
     figura leitura;
     page  = page - 1;
-    fseek(fp , 10*sizeof(char),SEEK_SET); //pula a senha com o cursor
+    fseek(fp ,sizeof(user),SEEK_SET); //pula a senha com o cursor
     if (page == 0)
     {
         int i;
@@ -168,19 +174,11 @@ void troca(FILE* fp1)
     while (respLog == 's')
     {
         fp2 = login();
-        fseek(fp1, 0 , SEEK_SET);
-        fseek(fp2, 0 , SEEK_SET);
-        if(fp2 == fp1) // como descobrir se 2 ponteiros apontam para o mesmo arquivo?
-        {
-            printf("mesmo usuario\n");
-            respLog = 's';
-        }
-        else
-        {
-            printf("usuario diferente\n");
-            respLog = 'n';
-        }
     }
+}
+int CmpArqv(FILE* fp1, FILE* fp2)
+{
+
 }
 void main()
 {
@@ -188,11 +186,7 @@ void main()
     FILE* user = NULL;
     //user = login();
     //troca(user);
-    
-    while(user == NULL)
-    {
-        user = cadastro();
-    }
+    user = cadastro();
     printf("Digite a pagina que deseja visualizar\n");
     scanf(" %d", &page);
     PrintPage(user , page);
