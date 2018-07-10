@@ -80,7 +80,6 @@ FILE* cadastro()
             ArqVazio(fp);
             return fp;
         }
-        
     }
     else
     {
@@ -160,11 +159,36 @@ void PrintPage(FILE* fp, unsigned int page)
         }
     }
 }
+void troca(FILE* fp1)
+{
+    char respLog = 's';
+    FILE* fp2 = NULL;
+    printf("Troca de Figurinhas!\n");
+    printf("solicite o login do outro usuario:\n");
+    while (respLog == 's')
+    {
+        fp2 = login();
+        fseek(fp1, 0 , SEEK_SET);
+        fseek(fp2, 0 , SEEK_SET);
+        if(fp2 == fp1) // como descobrir se 2 ponteiros apontam para o mesmo arquivo?
+        {
+            printf("mesmo usuario\n");
+            respLog = 's';
+        }
+        else
+        {
+            printf("usuario diferente\n");
+            respLog = 'n';
+        }
+    }
+}
 void main()
 {
     int page;
     FILE* user = NULL;
-    //login();
+    //user = login();
+    //troca(user);
+    
     while(user == NULL)
     {
         user = cadastro();
@@ -172,5 +196,4 @@ void main()
     printf("Digite a pagina que deseja visualizar\n");
     scanf(" %d", &page);
     PrintPage(user , page);
-
 }
