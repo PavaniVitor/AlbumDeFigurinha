@@ -3,18 +3,11 @@
 #include <string.h>
 
 #define EXTENSION ".cup"
-#define MAXFIGS 700 // trocar pelo numero correto de figurinhas que o album vai possuir
-#define PAGES 50    // trocar pelo numero correto de paginas do album
-#define FIGSPAGE 10 // trocar pelo numero correto de figurinhas por pagina
+#define MAXFIGS 700    // trocar pelo numero correto de figurinhas que o album vai possuir
+#define PAGES 50       // trocar pelo numero correto de paginas do album
+#define FIGSPAGE 10    // trocar pelo numero correto de figurinhas por pagina
+#define LIMPAR "clear" // "clear" para o linux , "cls" para o windows -> usado em system(LIMPAR);
 
-//-----------------A FAZER-----------------//
-
-//-> trocar a extensao .txt pela extensao que sera utilizada nos arquivos binarios
-
-//-> definir um algoritmo para escrever nos arquivos binarios, de forma que esses dados
-//   possam ser lidos e alterados dinamicamente durante a execuçao do programa
-
-//-------------LEMBRAR:-------------------//
 // usar wb+ para criar arquivos, mas as funçoes devem retornar ponteiros RB+ para ediçao!!!!
 
 typedef struct stickers
@@ -92,7 +85,7 @@ FILE *cadastro()
     }
     return NULL; // retornou NULL a gente sabe que ocorreu um erro na hora de criar o usuario;
 }
-void GravFig(int NumFig,  int QuantFig, FILE* fp)
+void GravFig(int unsigned NumFig, int QuantFig, FILE *fp)
 {
     int FigPos;
     figura grav;
@@ -104,7 +97,6 @@ void GravFig(int NumFig,  int QuantFig, FILE* fp)
         grav.quantidade = grav.quantidade + QuantFig;
         fseek(fp, sizeof(user), SEEK_SET);
         fwrite(&grav, sizeof(figura), 1, fp);
-        
     }
     else
     {
@@ -161,7 +153,7 @@ FILE *login()
         }
     }
 }
-void PrintPage(FILE *fp, unsigned int page)
+void ImprimirPag(FILE *fp, unsigned int page)
 {
     printf("Pagina: %d\n", page);
     figura leitura;
@@ -204,9 +196,52 @@ int CmpArqv(FILE *fp1, FILE *fp2)
         return 1;
     }
 }
+int PrintRepetidas(FILE *fp)
+{
+    int i, contador = 0;
+    figura leitura;
+    fseek(fp, sizeof(user), SEEK_SET);
+    printf("Figuras repetidas:\n");
+    for (i = 0; i < MAXFIGS; i++)
+    {
+        fread(&leitura, sizeof(figura), 1, fp);
+        if (leitura.quantidade > 1)
+        {
+            contador++;
+            printf("%3d ", leitura.numero);
+        }
+        if (contador == 10)
+        {
+            printf("\n");
+            contador = 0;
+        }
+    }
+    printf("\n");
+}
+int CheckRepetidas(FILE *fp, int NumFig)
+{
+    figura lida;
+    int FigPos = NumFig - 1;
+    fseek(fp, sizeof(user), SEEK_SET);
+    if (NumFig == 1)
+    {
+        fread(&lida, sizeof(figura), 1, fp);
+    }
+    else
+    {
+        fseek(fp, FigPos * sizeof(figura), SEEK_CUR);
+        fread(&lida, sizeof(figura), 1, fp);
+    }
+    if (lida.quantidade > 1)
+        return 1;
+    else
+        return 0;
+}
 void troca(FILE *fp1)
 {
     FILE *fp2 = NULL;
+    int resp = 1;
+    int escolha1, escolha2;
     printf("Troca de Figurinhas!\n");
     printf("solicite o login do outro usuario:\n");
     while (fp2 == NULL)
@@ -226,7 +261,41 @@ void troca(FILE *fp1)
             printf("tente novamente com outro usuario\n");
         }
     }
-    printf("fim da troca\n");
+    while (resp == 1)
+    {
+        printf("usuario 1: escolha uma figura do usuario 2\n");
+        PrintRepetidas(fp2);
+        scanf("%d", &escolha1);
+        if (CheckRepetidas(fp2, escolha1) == 0)
+        {
+            printf("o usuario nao possui essa figura repetida\n");
+            printf("escolha outra figura\n");
+        }
+        else 
+        {
+            resp = 0;
+        }
+    }
+    resp = 1;
+    while (resp == 1)
+    {
+        printf("usuario 2: escolha uma figura do usuario 1\n");
+        PrintRepetidas(fp1);
+        scanf("%d", &escolha2);
+        if (CheckRepetidas(fp1 , escolha2) == 0)
+        {
+            printf("o usuario nao possui essa figura repetida\n");
+            printf("escolha outra figura\n");
+        }
+        else
+        {
+            resp = 0;
+        }
+    }
+    GravFig(escolha1,1,fp1);
+    GravFig(escolha2 , -1 , fp1);
+    GravFig(escolha2 , 1 , fp2);
+    GravFig(escolha1 , -1 , fp2);
 }
 void main()
 {
@@ -238,11 +307,20 @@ void main()
     user = login();
 
     printf("digite o numero da figura que deseja adicionar:\n");
-    scanf("%d",&numerofig);
+    scanf("%d", &numerofig);
     printf("digite a quantidade que deseja adicionar:\n");
-    scanf("%d",&quantifig);
-    GravFig(numerofig, quantifig , user);
-    printf("digite a pagina que deseja visualizar\n");
-    scanf("%d",&page);
-    PrintPage(user, page);
+    scanf("%d", &quantifig);
+    GravFig(numerofig, quantifig, user);
+    printf("digite a pagina que deseja visualizar \n");
+    scanf ("%d", &page);
+    ImprimirPag(user,page);
+    troca(user);
+    printf("digite a pagina que deseja visualizar \n");
+    scanf ("%d", &page);
+    ImprimirPag(user,page);    
+    
+    //printf("digite a pagina que deseja visualizar\n");
+    //scanf("%d",&page);
+    //ImprimirPag(user, page);
+    PrintRepetidas(user);
 }
