@@ -196,6 +196,22 @@ int CmpArqv(FILE *fp1, FILE *fp2)
         return 1;
     }
 }
+void compra(FILE* fp){
+	char escolha;
+	int num, i;
+	printf ("deseja comprar um pacote?\ns para sim / n para Nao  "); //adicionar probabilidade de vir figurinhas novas
+	scanf ("%c", &escolha);
+	if (escolha=='s'){
+		printf("As figurinhas que vieram no pacote foram: ");
+		srand(time(NULL));
+		for (i = 0; i < 5; i++) {
+           /* gerando valores aleat�rios entre 1 e o num da ultima figurinha */
+           num = rand() % MAXFIGS;
+		   printf("%d ", num);
+           GravFig(num,  1, fp);
+     	}
+	}
+}
 int PrintRepetidas(FILE *fp)
 {
     int i, contador = 0;
