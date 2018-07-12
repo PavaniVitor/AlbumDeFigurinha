@@ -4,12 +4,15 @@
 #include <time.h>
 
 #define EXTENSION ".cup"
-#define MAXFIGS 700    // trocar pelo numero correto de figurinhas que o album vai possuir
-#define PAGES 70       // trocar pelo numero correto de paginas do album
-#define FIGSPAGE 10    // trocar pelo numero correto de figurinhas por pagina
-#define LIMPAR "clear" // "clear" para o linux , "cls" para o windows -> usado em system(LIMPAR);
+#define MAXFIGS 640    
+#define PAGES 64       
+#define FIGSPAGE 10    
 
-// usar wb+ para criar arquivos, mas as funçoes devem retornar ponteiros RB+ para ediçao!!!!
+#ifdef __linux__
+#define LIMPAR "clear"
+#elif _WIN32
+#define LIMPAR "cls"
+#endif
 
 typedef struct stickers
 {
@@ -444,7 +447,7 @@ int main()
                 EncomendaCarta(CheckStatus(user), user);
                 break;
             case 5:
-                CheckStatus(user);
+                printf("O album esta %% %d completo",CheckStatus(user));
                 break;
             case 6:
                 PrintRepetidas(user);
