@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define EXTENSION ".cup"
 #define MAXFIGS 700    // trocar pelo numero correto de figurinhas que o album vai possuir
@@ -85,6 +86,44 @@ FILE *cadastro()
     }
     return NULL; // retornou NULL a gente sabe que ocorreu um erro na hora de criar o usuario;
 }
+void GravString(FILE* fp, unsigned int numFig)
+{
+    int figPos = numFig  - 1;
+    char resp;
+    char nomeFig[20];
+    figura lida; 
+    fseek(fp ,sizeof(user),SEEK_SET);
+    if(numFig == 1) 
+    {
+        fread(&lida,sizeof(figura),1,fp);
+    }
+    else
+    {
+        fseek(fp , figPos*sizeof(figura), SEEK_CUR);
+        fread(&lida,sizeof(figura),1,fp);
+    }
+    if (strlen(lida.nome) == 0)
+    {
+        printf("Deseja inserir o nome na figura %d?[s/n]", lida.numero);
+        scanf(" %c", &resp);
+        if(resp == 's')
+        {
+            printf("Digite o nome da figura\n");
+            scanf(" %s", &nomeFig[0]);
+            strcpy(lida.nome,nomeFig);
+            fseek(fp ,sizeof(user),SEEK_SET);            
+            if(numFig == 1)
+            {
+                fwrite(&lida,sizeof(figura),1,fp);
+            }
+            else
+            {
+                fseek(fp , figPos*sizeof(figura), SEEK_CUR);
+                fwrite(&lida,sizeof(figura),1,fp);
+            }
+        }
+    }
+}
 void GravFig(int unsigned NumFig, int QuantFig, FILE *fp)
 {
     int FigPos;
@@ -107,6 +146,7 @@ void GravFig(int unsigned NumFig, int QuantFig, FILE *fp)
         fseek(fp, FigPos * sizeof(figura), SEEK_CUR);
         fwrite(&grav, sizeof(figura), 1, fp);
     }
+    GravString(fp , NumFig);
 }
 FILE *login()
 //funçao de login: retorna o ponteiro para o arquivo que o usuario abriu, dessa forma podemos identificar se o usuario ja esta logado por exemplo
@@ -165,7 +205,7 @@ void ImprimirPag(FILE *fp, unsigned int page)
         for (i = 0; i < FIGSPAGE; i++)
         {
             fread(&leitura, sizeof(figura), 1, fp);
-            printf(" %d %s %d\n", leitura.numero, leitura.nome, leitura.quantidade);
+            printf(" %3d %d %s\n", leitura.numero, leitura.quantidade, leitura.nome);
         }
     }
     else
@@ -175,7 +215,7 @@ void ImprimirPag(FILE *fp, unsigned int page)
         for (i = 0; i < FIGSPAGE; i++)
         {
             fread(&leitura, sizeof(figura), 1, fp);
-            printf(" %d %s %d\n", leitura.numero, leitura.nome, leitura.quantidade);
+            printf(" %3d %d %s\n", leitura.numero, leitura.quantidade, leitura.nome);            
         }
     }
 }
@@ -200,16 +240,17 @@ void compra(FILE* fp){
 	char escolha;
 	int num, i;
 	printf ("deseja comprar um pacote?\ns para sim / n para Nao  "); //adicionar probabilidade de vir figurinhas novas
-	scanf ("%c", &escolha);
+	scanf (" %c", &escolha);
 	if (escolha=='s'){
 		printf("As figurinhas que vieram no pacote foram: ");
 		srand(time(NULL));
 		for (i = 0; i < 5; i++) {
            /* gerando valores aleat�rios entre 1 e o num da ultima figurinha */
            num = rand() % MAXFIGS;
-		   printf("%d ", num);
+		   printf("%d \n", num);
            GravFig(num,  1, fp);
      	}
+        printf("\n");
 	}
 }
 int PrintRepetidas(FILE *fp)
@@ -312,31 +353,65 @@ void troca(FILE *fp1)
     GravFig(escolha2 , -1 , fp1);
     GravFig(escolha2 , 1 , fp2);
     GravFig(escolha1 , -1 , fp2);
+    fclose(fp2);
+    printf("troca realizada com sucesso\n");
+}
+float CheckStatus(FILE* fp)
+{
+    int i;
+    float contador = 0;
+    float porc;
+    figura lida;
+    fseek(fp,sizeof(user), SEEK_SET);
+    for(i = 0; i < MAXFIGS ; i++)
+    {
+        fread(&lida , sizeof(figura), 1 ,fp);
+        if(lida.quantidade > 0)
+        {
+            contador++;
+        }
+    }
+    porc = ((contador/MAXFIGS)*100);
+    return porc;
+}
+void EncomendaCarta (float porcentagem, FILE* fp) {
+	int num;
+	if(porcentagem>=95)
+	{
+		printf ("escolha as 35 figurinhas\n");
+		for (int i=0; i<35;i++){
+			scanf("%d", &num);
+			GravFig(num,1,fp);//numero, qtd, arquivo
+		}
+		printf("figurinhas adicionadas no album com sucesso\n");
+	}
+	else
+	{
+		printf("Necessario ter 95%% do album completo para pedir a carta\n");
+	}
 }
 void main()
 {
     int numerofig;
     int quantifig;
     int page;
-    int add;
+    float add;
     FILE *user = NULL;
     user = login();
 
-    printf("digite o numero da figura que deseja adicionar:\n");
-    scanf("%d", &numerofig);
-    printf("digite a quantidade que deseja adicionar:\n");
-    scanf("%d", &quantifig);
-    GravFig(numerofig, quantifig, user);
-    printf("digite a pagina que deseja visualizar \n");
-    scanf ("%d", &page);
-    ImprimirPag(user,page);
-    troca(user);
-    printf("digite a pagina que deseja visualizar \n");
-    scanf ("%d", &page);
-    ImprimirPag(user,page);    
+    compra(user);
+    //
+    add = CheckStatus(user);
+    printf("o album esta %f %% completo \n", add);
     
-    //printf("digite a pagina que deseja visualizar\n");
-    //scanf("%d",&page);
-    //ImprimirPag(user, page);
-    PrintRepetidas(user);
+    printf("digite a pagina que deseja visualizar\n");
+    scanf(" %d",&page);
+    ImprimirPag(user,page);
+    printf("digite a figura que deseja ver a string\n");
+    scanf("%d", &page);
+    GravString(user , page); 
+    printf("digite a pagina que deseja visualizar\n");
+    scanf(" %d",&page);    
+    ImprimirPag(user,page);
+
 }
