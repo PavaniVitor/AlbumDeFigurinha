@@ -5,7 +5,7 @@
 
 #define EXTENSION ".cup"
 #define MAXFIGS 700    // trocar pelo numero correto de figurinhas que o album vai possuir
-#define PAGES 50       // trocar pelo numero correto de paginas do album
+#define PAGES 70       // trocar pelo numero correto de paginas do album
 #define FIGSPAGE 10    // trocar pelo numero correto de figurinhas por pagina
 #define LIMPAR "clear" // "clear" para o linux , "cls" para o windows -> usado em system(LIMPAR);
 
@@ -86,40 +86,40 @@ FILE *cadastro()
     }
     return NULL; // retornou NULL a gente sabe que ocorreu um erro na hora de criar o usuario;
 }
-void GravString(FILE* fp, unsigned int numFig)
+void GravString(FILE *fp, unsigned int numFig)
 {
-    int figPos = numFig  - 1;
+    int figPos = numFig - 1;
     char resp;
     char nomeFig[20];
-    figura lida; 
-    fseek(fp ,sizeof(user),SEEK_SET);
-    if(numFig == 1) 
+    figura lida;
+    fseek(fp, sizeof(user), SEEK_SET);
+    if (numFig == 1)
     {
-        fread(&lida,sizeof(figura),1,fp);
+        fread(&lida, sizeof(figura), 1, fp);
     }
     else
     {
-        fseek(fp , figPos*sizeof(figura), SEEK_CUR);
-        fread(&lida,sizeof(figura),1,fp);
+        fseek(fp, figPos * sizeof(figura), SEEK_CUR);
+        fread(&lida, sizeof(figura), 1, fp);
     }
     if (strlen(lida.nome) == 0)
     {
         printf("Deseja inserir o nome na figura %d?[s/n]", lida.numero);
         scanf(" %c", &resp);
-        if(resp == 's')
+        if (resp == 's')
         {
             printf("Digite o nome da figura\n");
             scanf(" %s", &nomeFig[0]);
-            strcpy(lida.nome,nomeFig);
-            fseek(fp ,sizeof(user),SEEK_SET);            
-            if(numFig == 1)
+            strcpy(lida.nome, nomeFig);
+            fseek(fp, sizeof(user), SEEK_SET);
+            if (numFig == 1)
             {
-                fwrite(&lida,sizeof(figura),1,fp);
+                fwrite(&lida, sizeof(figura), 1, fp);
             }
             else
             {
-                fseek(fp , figPos*sizeof(figura), SEEK_CUR);
-                fwrite(&lida,sizeof(figura),1,fp);
+                fseek(fp, figPos * sizeof(figura), SEEK_CUR);
+                fwrite(&lida, sizeof(figura), 1, fp);
             }
         }
     }
@@ -146,7 +146,7 @@ void GravFig(int unsigned NumFig, int QuantFig, FILE *fp)
         fseek(fp, FigPos * sizeof(figura), SEEK_CUR);
         fwrite(&grav, sizeof(figura), 1, fp);
     }
-    GravString(fp , NumFig);
+    GravString(fp, NumFig);
 }
 FILE *login()
 //funçao de login: retorna o ponteiro para o arquivo que o usuario abriu, dessa forma podemos identificar se o usuario ja esta logado por exemplo
@@ -195,30 +195,38 @@ FILE *login()
 }
 void ImprimirPag(FILE *fp, unsigned int page)
 {
-    printf("Pagina: %d\n", page);
-    figura leitura;
-    page = page - 1;
-    fseek(fp, sizeof(user), SEEK_SET); //pula a senha com o cursor
-    if (page == 0)
+    if (page <= PAGES)
     {
-        int i;
-        for (i = 0; i < FIGSPAGE; i++)
+        printf("Pagina: %d\n", page);
+        figura leitura;
+        page = page - 1;
+        fseek(fp, sizeof(user), SEEK_SET); //pula a senha com o cursor
+        if (page == 0)
         {
-            fread(&leitura, sizeof(figura), 1, fp);
-            printf(" %3d %d %s\n", leitura.numero, leitura.quantidade, leitura.nome);
+            int i;
+            for (i = 0; i < FIGSPAGE; i++)
+            {
+                fread(&leitura, sizeof(figura), 1, fp);
+                printf(" %3d %d %s\n", leitura.numero, leitura.quantidade, leitura.nome);
+            }
+        }
+        else
+        {
+            int i;
+            fseek(fp, FIGSPAGE * sizeof(figura) * page, SEEK_CUR);
+            for (i = 0; i < FIGSPAGE; i++)
+            {
+                fread(&leitura, sizeof(figura), 1, fp);
+                printf(" %3d %d %s\n", leitura.numero, leitura.quantidade, leitura.nome);
+            }
         }
     }
     else
     {
-        int i;
-        fseek(fp, FIGSPAGE * sizeof(figura) * page, SEEK_CUR);
-        for (i = 0; i < FIGSPAGE; i++)
-        {
-            fread(&leitura, sizeof(figura), 1, fp);
-            printf(" %3d %d %s\n", leitura.numero, leitura.quantidade, leitura.nome);            
-        }
+        printf("O Album so vai ate a pagina %d\n" , PAGES);
     }
 }
+
 int CmpArqv(FILE *fp1, FILE *fp2)
 {
     user logados[2];
@@ -236,22 +244,25 @@ int CmpArqv(FILE *fp1, FILE *fp2)
         return 1;
     }
 }
-void compra(FILE* fp){
-	char escolha;
-	int num, i;
-	printf ("deseja comprar um pacote?\ns para sim / n para Nao  "); //adicionar probabilidade de vir figurinhas novas
-	scanf (" %c", &escolha);
-	if (escolha=='s'){
-		printf("As figurinhas que vieram no pacote foram: ");
-		srand(time(NULL));
-		for (i = 0; i < 5; i++) {
-           /* gerando valores aleat�rios entre 1 e o num da ultima figurinha */
-           num = rand() % MAXFIGS;
-		   printf("%d \n", num);
-           GravFig(num,  1, fp);
-     	}
+void compra(FILE *fp)
+{
+    char escolha;
+    int num, i;
+    printf("deseja comprar um pacote?\ns para sim / n para Nao  "); //adicionar probabilidade de vir figurinhas novas
+    scanf(" %c", &escolha);
+    if (escolha == 's')
+    {
+        srand(time(NULL));
+        for (i = 0; i < 5; i++)
+        {
+            printf("A %dº figura que veio no pacote foi: ", i + 1);
+            /* gerando valores aleat�rios entre 1 e o num da ultima figurinha */
+            num = rand() % MAXFIGS;
+            printf("%d \n", num);
+            GravFig(num, 1, fp);
+        }
         printf("\n");
-	}
+    }
 }
 int PrintRepetidas(FILE *fp)
 {
@@ -328,7 +339,7 @@ void troca(FILE *fp1)
             printf("o usuario nao possui essa figura repetida\n");
             printf("escolha outra figura\n");
         }
-        else 
+        else
         {
             resp = 0;
         }
@@ -339,7 +350,7 @@ void troca(FILE *fp1)
         printf("usuario 2: escolha uma figura do usuario 1\n");
         PrintRepetidas(fp1);
         scanf("%d", &escolha2);
-        if (CheckRepetidas(fp1 , escolha2) == 0)
+        if (CheckRepetidas(fp1, escolha2) == 0)
         {
             printf("o usuario nao possui essa figura repetida\n");
             printf("escolha outra figura\n");
@@ -349,69 +360,103 @@ void troca(FILE *fp1)
             resp = 0;
         }
     }
-    GravFig(escolha1,1,fp1);
-    GravFig(escolha2 , -1 , fp1);
-    GravFig(escolha2 , 1 , fp2);
-    GravFig(escolha1 , -1 , fp2);
+    GravFig(escolha1, 1, fp1);
+    GravFig(escolha2, -1, fp1);
+    GravFig(escolha2, 1, fp2);
+    GravFig(escolha1, -1, fp2);
     fclose(fp2);
     printf("troca realizada com sucesso\n");
 }
-float CheckStatus(FILE* fp)
+float CheckStatus(FILE *fp)
 {
     int i;
     float contador = 0;
     float porc;
     figura lida;
-    fseek(fp,sizeof(user), SEEK_SET);
-    for(i = 0; i < MAXFIGS ; i++)
+    fseek(fp, sizeof(user), SEEK_SET);
+    for (i = 0; i < MAXFIGS; i++)
     {
-        fread(&lida , sizeof(figura), 1 ,fp);
-        if(lida.quantidade > 0)
+        fread(&lida, sizeof(figura), 1, fp);
+        if (lida.quantidade > 0)
         {
             contador++;
         }
     }
-    porc = ((contador/MAXFIGS)*100);
+    porc = ((contador / MAXFIGS) * 100);
     return porc;
 }
-void EncomendaCarta (float porcentagem, FILE* fp) {
-	int num;
-	if(porcentagem>=95)
-	{
-		printf ("escolha as 35 figurinhas\n");
-		for (int i=0; i<35;i++){
-			scanf("%d", &num);
-			GravFig(num,1,fp);//numero, qtd, arquivo
-		}
-		printf("figurinhas adicionadas no album com sucesso\n");
-	}
-	else
-	{
-		printf("Necessario ter 95%% do album completo para pedir a carta\n");
-	}
-}
-void main()
+void EncomendaCarta(float porcentagem, FILE *fp)
 {
-    int numerofig;
-    int quantifig;
-    int page;
-    float add;
+    int num;
+    if (porcentagem >= 95)
+    {
+        printf("escolha as 35 figurinhas\n");
+        for (int i = 0; i < 35; i++)
+        {
+            scanf("%d", &num);
+            GravFig(num, 1, fp); //numero, qtd, arquivo
+        }
+        printf("figurinhas adicionadas no album com sucesso\n");
+    }
+    else
+    {
+        printf("Necessario ter 95%% do album completo para pedir a carta\n");
+    }
+}
+int main()
+{
+    int opfuncao = 0, opinicio = 0;
+    unsigned int page;
     FILE *user = NULL;
-    user = login();
-
-    compra(user);
-    //
-    add = CheckStatus(user);
-    printf("o album esta %f %% completo \n", add);
-    
-    printf("digite a pagina que deseja visualizar\n");
-    scanf(" %d",&page);
-    ImprimirPag(user,page);
-    printf("digite a figura que deseja ver a string\n");
-    scanf("%d", &page);
-    GravString(user , page); 
-    printf("digite a pagina que deseja visualizar\n");
-    scanf(" %d",&page);    
-    ImprimirPag(user,page);
-
+    while (user == NULL && opinicio != 3)
+    {
+        printf("Bem vindo ao album da copa!\nDigite 1 para cadastrar\nDigite 2 para fazer o login\nDigite 3 para sair");
+        scanf("%d", &opinicio);
+        if (opinicio == 1)
+        {
+            user = cadastro();
+        }
+        else if (opinicio == 2)
+        {
+            user = login();
+        }
+    }
+    if (user != NULL)
+    {
+        while (opfuncao != 7)
+        { //adicionar num certo
+            printf("O que dezeja fazer:\n1-comprar pacotinho\n2-visualizar uma pagina\n3-trocar figurinhas com outro usurio\n4-enviar uma carta para pedir as ultimas 35 figurinhas\n5-ver o estado do album\n6-Ver Repetidas\n7-sair\n");
+            scanf("%d", &opfuncao);
+            switch (opfuncao)
+            {
+            case 1:
+                compra(user);
+                break;
+            case 2:
+                printf("Digite a pagina que deseja visualizar:");
+                scanf("%d", &page);
+                ImprimirPag(user, page);
+                break;
+            case 3:
+                troca(user);
+                break;
+            case 4:
+                EncomendaCarta(CheckStatus(user), user);
+                break;
+            case 5:
+                CheckStatus(user);
+                break;
+            case 6:
+                PrintRepetidas(user);
+                break;
+            case 7:
+                break;
+            default:
+                printf("erro\n");
+                break;
+            }
+        }
+        fclose(user);
+    }
+    return 0;
 }
