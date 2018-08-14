@@ -149,11 +149,13 @@ void GravFig(int unsigned NumFig, int QuantFig, FILE *fp)
         fseek(fp, FigPos * sizeof(figura), SEEK_CUR);
         fwrite(&grav, sizeof(figura), 1, fp);
     }
-    GravString(fp, NumFig);
+    if(QuantFig > 0)
+    {
+        GravString(fp, NumFig);
+    }
 }
 FILE *login()
-//funçao de login: retorna o ponteiro para o arquivo que o usuario abriu, dessa forma podemos identificar se o usuario ja esta logado por exemplo
-{ //colocar a extensao que vai ser utilizada pelos arquivos binarios
+{ 
 
     user usuario;
     user userLido;
@@ -408,6 +410,7 @@ void EncomendaCarta(float porcentagem, FILE *fp)
 }
 int main()
 {
+    system(LIMPAR);
     int opfuncao = 0, opinicio = 0;
     unsigned int page;
     FILE *user = NULL;
@@ -427,8 +430,8 @@ int main()
     if (user != NULL)
     {
         while (opfuncao != 7)
-        { //adicionar num certo
-            printf("O que dezeja fazer:\n1-comprar pacotinho\n2-visualizar uma pagina\n3-trocar figurinhas com outro usurio\n4-enviar uma carta para pedir as ultimas 35 figurinhas\n5-ver o estado do album\n6-Ver Repetidas\n7-sair\n");
+        { 
+            printf("O que deseja fazer:\n1-comprar pacotinho\n2-visualizar paginas\n3-trocar figurinhas com outro usurio\n4-enviar uma carta para pedir as ultimas 35 figurinhas\n5-ver o estado do album\n6-Ver Repetidas\n7-sair\n");
             scanf("%d", &opfuncao);
             switch (opfuncao)
             {
