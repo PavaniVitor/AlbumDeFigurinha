@@ -283,7 +283,7 @@ int PrintRepetidas(FILE *fp)
             contador++;
             printf("%3d ", leitura.numero);
         }
-        if ((contador % 10) == 0)
+        if ((contador %10) == 0)
         {
             printf("\n");
         }
@@ -477,9 +477,9 @@ int main()
     }
     if (user != NULL)
     {
+        system(LIMPAR);
         while (opfuncao != 7)
         {
-            system(LIMPAR);
             printf("O que deseja fazer:\n1-comprar pacotinho\n2-visualizar paginas\n3-trocar figurinhas com outro usurio\n4-enviar uma carta para pedir as ultimas 35 figurinhas\n5-ver o estado do album\n6-Ver Repetidas\n7-sair\n");
             scanf("%d", &opfuncao);
             switch (opfuncao)
@@ -507,7 +507,7 @@ int main()
             default:
                 printf("erro\n");
                 break;
-            }
+            }        
         }
         fclose(user);
     }
