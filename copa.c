@@ -4,9 +4,9 @@
 #include <time.h>
 
 #define EXTENSION ".cup"
-#define MAXFIGS 640    
-#define PAGES 64       
-#define FIGSPAGE 10    
+#define MAXFIGS 640
+#define PAGES 64
+#define FIGSPAGE 10
 
 #ifdef __linux__
 #define LIMPAR "clear"
@@ -149,13 +149,13 @@ void GravFig(int unsigned NumFig, int QuantFig, FILE *fp)
         fseek(fp, FigPos * sizeof(figura), SEEK_CUR);
         fwrite(&grav, sizeof(figura), 1, fp);
     }
-    if(QuantFig > 0)
+    if (QuantFig > 0)
     {
         GravString(fp, NumFig);
     }
 }
 FILE *login()
-{ 
+{
 
     user usuario;
     user userLido;
@@ -228,7 +228,7 @@ void ImprimirPag(FILE *fp, unsigned int page)
     }
     else
     {
-        printf("O Album so vai ate a pagina %d\n" , PAGES);
+        printf("O Album so vai ate a pagina %d\n", PAGES);
     }
 }
 
@@ -283,11 +283,14 @@ int PrintRepetidas(FILE *fp)
             contador++;
             printf("%3d ", leitura.numero);
         }
-        if (contador == 10)
+        if ((contador % 10) == 0)
         {
             printf("\n");
-            contador = 0;
         }
+    }
+    if(contador == 0)
+    {
+        printf("O album nao tem nenhuma figura repetida!");
     }
     printf("\n");
 }
@@ -408,7 +411,52 @@ void EncomendaCarta(float porcentagem, FILE *fp)
         printf("Necessario ter 95%% do album completo para pedir a carta\n");
     }
 }
+
+void GerenPage(FILE *fp)
+{
+    unsigned int page;
+    char resp = 's';
+    printf("Digite a pagina que deseja visualizar\n");
+    scanf(" %d", &page);
+    system(LIMPAR);
+    ImprimirPag(fp, page);
+
+    while (resp != 'q')
+    {
+        printf("digite s para ver a proxima pagina, a para a anterior q para sair\n");
+        scanf(" %c", &resp);
+        system(LIMPAR);
+        if (resp == 's')
+        {
+            if (page < PAGES)
+            {
+                page = page + 1;
+                ImprimirPag(fp, page);
+            }
+            else
+            {
+                printf("Fim do Album\n");
+            }
+        }
+        else if (resp == 'a')
+        {
+            if (page > 1)
+            {
+                page = page - 1;
+                ImprimirPag(fp, page);
+            }
+            else
+                printf("Inicio Do Album\n");
+        }
+        else if (resp != 'q')
+        {
+            printf("resposta invalida\n");
+        }
+    }
+}
+
 int main()
+
 {
     system(LIMPAR);
     int opfuncao = 0, opinicio = 0;
@@ -430,7 +478,8 @@ int main()
     if (user != NULL)
     {
         while (opfuncao != 7)
-        { 
+        {
+            system(LIMPAR);
             printf("O que deseja fazer:\n1-comprar pacotinho\n2-visualizar paginas\n3-trocar figurinhas com outro usurio\n4-enviar uma carta para pedir as ultimas 35 figurinhas\n5-ver o estado do album\n6-Ver Repetidas\n7-sair\n");
             scanf("%d", &opfuncao);
             switch (opfuncao)
@@ -439,9 +488,7 @@ int main()
                 compra(user);
                 break;
             case 2:
-                printf("Digite a pagina que deseja visualizar:");
-                scanf("%d", &page);
-                ImprimirPag(user, page);
+                GerenPage(user);
                 break;
             case 3:
                 troca(user);
@@ -450,7 +497,7 @@ int main()
                 EncomendaCarta(CheckStatus(user), user);
                 break;
             case 5:
-                printf("O album esta %% %d completo",CheckStatus(user));
+                printf("O album esta %% %f completo", CheckStatus(user));
                 break;
             case 6:
                 PrintRepetidas(user);
