@@ -41,12 +41,12 @@ int ArqVazio(FILE *fp)
     }
     if (gravando == MAXFIGS)
     {
-        printf("usuario criado com sucesso\n");
+        printf("Usuario criado com sucesso!\n");
         return 1;
     }
     else
     {
-        printf("falha ao criar usuario %d", gravando);
+        printf("Falha ao criar usuario %d :(\n", gravando);
         return 0;
     }
 }
